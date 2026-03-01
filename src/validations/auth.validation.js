@@ -6,6 +6,8 @@ const register = {
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
     name: Joi.string().required(),
+    phone: Joi.string().required(),
+    countryCode: Joi.string().required(),
   }),
 };
 
@@ -44,8 +46,9 @@ const resetPassword = {
 };
 
 const verifyEmail = {
-  query: Joi.object().keys({
-    token: Joi.string().required(),
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    otp: Joi.string().required(),
   }),
 };
 const verifyotp = {
@@ -65,35 +68,35 @@ const createAttendents = {
     age: Joi.string().required(),
     phone: Joi.string().required(),
     tagId: Joi.string(),
-    status:Joi.string()
+    status: Joi.string()
   })
 }
 
 const resendOtp = {
-  body:Joi.object().keys({
-    emailToken:Joi.string().required()
+  body: Joi.object().keys({
+    emailToken: Joi.string().required()
   })
 }
 
 const editProfile = {
-  body:Joi.object().keys({
-    name:Joi.string(),
-    email:Joi.string(),
-    phone:Joi.string(),
-    image:Joi.string()
+  body: Joi.object().keys({
+    name: Joi.string(),
+    email: Joi.string(),
+    phone: Joi.string(),
+    image: Joi.string()
   })
 }
 
 const changePassword = {
-  body:Joi.object().keys({
-    oldPassword:Joi.string().required(),
-    newPassword:Joi.string().required()
+  body: Joi.object().keys({
+    oldPassword: Joi.string().required(),
+    newPassword: Joi.string().required()
   })
 }
 
 const loginWithQr = {
-  body:Joi.object().keys({
-    tagId:Joi.string().required()
+  body: Joi.object().keys({
+    tagId: Joi.string().required()
   })
 }
 

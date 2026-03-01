@@ -15,7 +15,7 @@ router.post('/reset-password/:token', validate(authValidation.resetPassword), au
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
 router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
 router.get("/me", auth(), authController.authMe)
-router.post("/verify-otp/:token",validate(authValidation.verifyotp),authController.verifyOtp)
+router.post("/verify-otp/:token", validate(authValidation.verifyotp), authController.verifyOtp)
 router.post("/resend-otp", validate(authValidation.resendOtp), authController.resendOtp)
 module.exports = router;
 
@@ -42,6 +42,7 @@ module.exports = router;
  *               - name
  *               - email
  *               - password
+ *               - countryCode
  *             properties:
  *               name:
  *                 type: string
@@ -54,10 +55,18 @@ module.exports = router;
  *                 format: password
  *                 minLength: 8
  *                 description: At least one number and one letter
+ *               phone:
+ *                 type: string
+ *                 description: User's phone number
+ *               countryCode:
+ *                 type: string
+ *                 description: User's country code (e.g., +91)
  *             example:
  *               name: fake name
  *               email: fake@example.com
  *               password: password1
+ *               phone: "1234567890"
+ *               countryCode: "+91"
  *     responses:
  *       "201":
  *         description: Created
@@ -66,10 +75,13 @@ module.exports = router;
  *             schema:
  *               type: object
  *               properties:
- *                 user:
- *                   $ref: '#/components/schemas/User'
- *                 tokens:
- *                   $ref: '#/components/schemas/AuthTokens'
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *             example:
+ *               success: true
+ *               message: OTP sent to your email. Please verify to complete registration.
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  */
@@ -269,27 +281,139 @@ module.exports = router;
  * @swagger
  * /auth/verify-email:
  *   post:
- *     summary: verify email
+ *     summary: Verify email using OTP
  *     tags: [Auth]
- *     parameters:
- *       - in: query
- *         name: token
- *         required: true
- *         schema:
- *           type: string
- *         description: The verify email token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address used during registration
+ *               otp:
+ *                 type: string
+ *                 description: The 6-digit OTP sent to email
+ *             example:
+ *               email: "user@example.com"
+ *               otp: "123456"
  *     responses:
- *       "204":
- *         description: No content
- *       "401":
- *         description: verify email failed
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *                 tokens:
+ *                   $ref: '#/components/schemas/AuthTokens'
+ *       "400":
+ *         description: Email verification failed
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *             example:
- *               code: 401
- *               message: verify email failed
+ *               code: 400
+ *               message: Invalid OTP
+ *
+ * /auth/me:
+ *   get:
+ *     summary: Get current user info
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *
+ * /auth/verify-otp/{token}:
+ *   post:
+ *     summary: Verify OTP for password reset
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Reset password token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - otp
+ *             properties:
+ *               otp:
+ *                 type: string
+ *             example:
+ *               otp: "123456"
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       "400":
+ *         description: Invalid OTP
+ *
+ * /auth/resend-otp:
+ *   post:
+ *     summary: Resend OTP
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - emailToken
+ *             properties:
+ *               emailToken:
+ *                 type: string
+ *             example:
+ *               emailToken: "encoded_email_token"
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: string
+ *                   description: New reset password token
  */
-
 
