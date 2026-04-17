@@ -1,17 +1,16 @@
 import { axios } from '@/lib/axios';
-
-import { UserResponse } from '../types';
+import { RegisterResponse } from '../types';
 
 export type RegisterCredentialsDTO = {
-  first_name: string;
-  last_name: string;
-  legal_company_name: string;
+  name: string;
   email: string;
-  phone_number: string;
+  password: string;
+  phone?: string;
+  countryCode?: string;
 };
 
 export const registerWithEmailAndPassword = (
   data: RegisterCredentialsDTO
-): Promise<UserResponse> => {
+): Promise<RegisterResponse> => {
   return axios.post('/auth/register', data);
 };
