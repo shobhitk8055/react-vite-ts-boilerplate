@@ -1,6 +1,6 @@
 const express = require('express');
 const helmet = require('helmet');
-const xss = require('xss-clean');
+const { xss } = require('express-xss-sanitizer');
 const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
 const cors = require('cors');
@@ -40,7 +40,7 @@ const corsOptions = {
   credentials: true, 
 };
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); 
+app.options('/{*any}', cors(corsOptions)); 
 
 // jwt authentication
 app.use(passport.initialize());
@@ -60,7 +60,7 @@ app.use('/v1', routes);
 
 app.use(express.static('frontend/dist'));
 app.use('/uploads', express.static('uploads'));
-app.get('*', (req, res) => {
+app.get('/{*any}', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html')); // relative path
 });
 
